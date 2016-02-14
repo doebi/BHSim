@@ -57,9 +57,27 @@ body {
     </script>
     <script type="text/javascript" charset="utf-8">
         $(function(){
+            var game;
+            var cooldowns = [];
+            var levels = [
+                {
+                    "label": "Rekr",
+                    "xp": 10,
+                },
+                {
+                    "label": "Gfr",
+                    "xp": 20,
+                },
+                {
+                    "label": "Kpl",
+                    "xp": 30,
+                },
+                {
+                    "label": "Zgf",
+                    "xp": 400000000,
+                }
+            ];
             var progressTemplate = Handlebars.compile($("#progress-template").html());
-            var xp = 0;
-            var xpElement = $("#xp");
 
             var Cooldown = function(container){
                 this.container = container;
@@ -74,13 +92,13 @@ body {
                 }
                 var progress = timestamp-this.start;
                 if (progress > this.cooldown) {
-                    this.container.html("<button class=\"btn btn-primary btn-block\">Durchführen</button>");
+                    this.container.html("<button class=\"btn btn-success btn-block\">Durchführen</button>");
                     this.container.find("button").on("click", function(){
                         var cd = new Cooldown($(this).parent());
                         cooldowns.push(cd);
                     });
                     cooldowns.splice(cooldowns.indexOf(this), 1);
-                    xp += this.reward;
+                    game.xp += this.reward;
                 } else {
                     var context = {};
                     context.width = progress / (this.cooldown/100);
@@ -103,23 +121,40 @@ body {
                 }
             };
 
-            var cooldowns = [];
+            var Game = function() {
+                this.xp = 0;
+                this.xpElement = $("#xp");
+                this.levelElement = $("#level");
+                this.init();
+                this.level = levels[0];
+            };
 
-            // create buttons
-            $(".action-trigger button").on("click", function(){
-                var cd = new Cooldown($(this).parent());
-                cooldowns.push(cd);
-            });
+            Game.prototype.init = function(){
+                /* weird shit in here */
+                $(".action-trigger button").on("click", function(){
+                    var cd = new Cooldown($(this).parent());
+                    cooldowns.push(cd);
+                });
+            };
 
-            function step(timestamp) {
+            Game.prototype.update = function(timestamp){
+                if(this.xp >= this.level.xp){
+                    this.level = levels[levels.indexOf(this.level)+1];
+                }
+                this.xpElement.html(this.xp);
+                this.levelElement.html(this.level.label);
                 cooldowns.forEach(function(obj){
                     obj.update(timestamp);
                 });
-                xpElement.html(xp);
+            };
+
+            function step(timestamp) {
+                game.update(timestamp);
                 window.requestAnimationFrame(step);
             }
             
             window.requestAnimationFrame(step);
+            game = new Game();
         });
     </script>
 </head>
@@ -127,14 +162,14 @@ body {
     <div class="container">
         <div class="row">
             <div class="col-md-12">
-                <h3>MUSTERMANN, Rekr <small>XP: <span id="xp">1337</span></small></h3>
+                <h3>MUSTERMANN, <span id="level"></span> <small>XP: <span id="xp">1337</span></small></h3>
             </div>
         </div>
         <div class="row">
             <div class="col-md-12">
-                <h4>Liegestütz<small> +2XP</small></h4>
-                <div data-cooldown="2" data-reward="2" class="action-trigger">
-                    <button class="btn btn-primary btn-block">Durchführen</button>
+                <h4>Liegestütz<small> +1XP</small></h4>
+                <div data-cooldown="2" data-reward="1" class="action-trigger">
+                    <button class="btn btn-success btn-block">Durchführen</button>
                 </div>
             </div>
         </div>
@@ -142,7 +177,7 @@ body {
             <div class="col-md-12">
                 <h4>Bettenbau<small> +15XP</small></h4>
                 <div data-cooldown="60" data-reward="15" class="action-trigger">
-                    <button class="btn btn-primary btn-block">Durchführen</button>
+                    <button class="btn btn-success btn-block">Durchführen</button>
                 </div>
             </div>
         </div>
@@ -150,7 +185,7 @@ body {
             <div class="col-md-12">
                 <h4>Waffe reinigen<small> +200XP</small></h4>
                 <div data-cooldown="3000" data-reward="200" class="action-trigger">
-                    <button class="btn btn-primary btn-block">Durchführen</button>
+                    <button class="btn btn-success btn-block">Durchführen</button>
                 </div>
             </div>
         </div>
@@ -158,7 +193,7 @@ body {
             <div class="col-md-12">
                 <h4>Chargendienst<small> +5000XP</small></h4>
                 <div data-cooldown="86400" data-reward="5000" class="action-trigger">
-                    <button class="btn btn-primary btn-block">Durchführen</button>
+                    <button class="btn btn-success btn-block">Durchführen</button>
                 </div>
             </div>
         </div>
