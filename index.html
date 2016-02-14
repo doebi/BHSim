@@ -1,0 +1,162 @@
+<html>
+<head>
+    <meta charset="utf-8">
+    <title>test</title>
+    <link rel="stylesheet" href="css/bootstrap.min.css" type="text/css" media="screen" title="no title" charset="utf-8">
+    <style type="text/css" media="screen">
+body {
+    color: #000;
+    font-family: Arial;
+}
+
+.action-list {
+    width: 600px;
+    margin: 0px auto;
+}
+
+.action-panel {
+    width: 400px;
+    margin-top: 5px;
+    background-color: #C0C0C0;
+    text-align: center;
+    padding: 10px;
+}
+
+.action-trigger {
+    margin: 0px auto;
+    cursor: pointer;
+}
+
+.progress-bar {
+    padding: 6px 12px;
+}
+
+.btn {
+    height: 32px;
+    margin-bottom: 20px;
+}
+
+.progress {
+    height: 32px;
+    margin: 0px;
+    font-size: 14px;
+    border: 1px solid #2e6da4;
+}
+    </style>
+
+    <script type="text/javascript" charset="utf-8" src="js/jquery-2.2.0.min.js"></script>
+    <script type="text/javascript" charset="utf-8" src="js/handlebars-v4.0.5.js"></script>
+    <script id="progress-template" type="text/x-handlebars-template" charset="utf-8">
+        <div class="progress">
+            <div class="progress-bar" role="progressbar" aria-valuenow="{{width}}" aria-valuemin="0" aria-valuemax="100" style="width: {{width}}%;">
+                {{displayValue}}%
+            </div>
+        </div>
+        <span class="pull-right">{{timeleft.days}}:{{timeleft.hours}}:{{timeleft.minutes}}:{{timeleft.seconds}}</span>
+    </script>
+    <script type="text/javascript" charset="utf-8">
+        $(function(){
+            var progressTemplate = Handlebars.compile($("#progress-template").html());
+            var xp = 0;
+            var xpElement = $("#xp");
+
+            var Cooldown = function(container){
+                this.container = container;
+                this.start = null;
+                this.cooldown = Number(container.data("cooldown"))*1000;
+                this.reward = Number(container.data("reward"));
+            };
+
+            Cooldown.prototype.update = function(timestamp){
+                if(this.start == null){
+                    this.start = timestamp;
+                }
+                var progress = timestamp-this.start;
+                if (progress > this.cooldown) {
+                    this.container.html("<button class=\"btn btn-primary btn-block\">Durchführen</button>");
+                    cooldowns.splice(cooldowns.indexOf(this), 1);
+                    xp += this.reward;
+                } else {
+                    var context = {};
+                    context.width = progress / (this.cooldown/100);
+                    context.displayValue = parseInt(context.width);
+                    var value = parseInt((this.cooldown - progress)/1000);
+                    context.timeleft = {
+                        days: 0,
+                        hours: 0,
+                        minutes: 0,
+                        seconds: 0,
+                    };
+                    context.timeleft.seconds = parseInt(value % 60); 
+                    value = value / 60;
+                    context.timeleft.minutes = parseInt(value % 60); 
+                    value = value / 60;
+                    context.timeleft.hours = parseInt(value % 24); 
+                    value = value / 24;
+                    context.timeleft.days = parseInt(value); 
+                    this.container.html(progressTemplate(context));
+                }
+            };
+
+            var cooldowns = [];
+
+            // create buttons
+            $(".action-trigger").click(function(){
+                var cd = new Cooldown($(this));
+                cooldowns.push(cd);
+            });
+
+            function step(timestamp) {
+                cooldowns.forEach(function(obj){
+                    obj.update(timestamp);
+                });
+                xpElement.html(xp);
+                window.requestAnimationFrame(step);
+            }
+            
+            window.requestAnimationFrame(step);
+        });
+    </script>
+</head>
+<body>
+    <div class="container">
+        <div class="row">
+            <div class="col-md-12">
+                <h3>MUSTERMANN, Rekr <small>XP: <span id="xp">1337</span></small></h3>
+            </div>
+        </div>
+        <div class="row">
+            <div class="col-md-12">
+                <h4>Liegestütz<small> +2XP</small></h4>
+                <div data-cooldown="2" data-reward="2" class="action-trigger">
+                    <button class="btn btn-primary btn-block">Durchführen</button>
+                </div>
+            </div>
+        </div>
+        <div class="row">
+            <div class="col-md-12">
+                <h4>Bettenbau<small> +15XP</small></h4>
+                <div data-cooldown="60" data-reward="15" class="action-trigger">
+                    <button class="btn btn-primary btn-block">Durchführen</button>
+                </div>
+            </div>
+        </div>
+        <div class="row">
+            <div class="col-md-12">
+                <h4>Waffe reinigen<small> +200XP</small></h4>
+                <div data-cooldown="900" data-reward="200" class="action-trigger">
+                    <button class="btn btn-primary btn-block">Durchführen</button>
+                </div>
+            </div>
+        </div>
+        <div class="row">
+            <div class="col-md-12">
+                <h4>Chargendienst<small> +5000XP</small></h4>
+                <div data-cooldown="86400" data-reward="5000" class="action-trigger">
+                    <button class="btn btn-primary btn-block">Durchführen</button>
+                </div>
+            </div>
+        </div>
+    </div>
+</body>
+</html>
