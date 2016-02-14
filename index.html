@@ -75,6 +75,10 @@ body {
                 var progress = timestamp-this.start;
                 if (progress > this.cooldown) {
                     this.container.html("<button class=\"btn btn-primary btn-block\">Durchführen</button>");
+                    this.container.find("button").on("click", function(){
+                        var cd = new Cooldown($(this).parent());
+                        cooldowns.push(cd);
+                    });
                     cooldowns.splice(cooldowns.indexOf(this), 1);
                     xp += this.reward;
                 } else {
@@ -102,8 +106,8 @@ body {
             var cooldowns = [];
 
             // create buttons
-            $(".action-trigger").click(function(){
-                var cd = new Cooldown($(this));
+            $(".action-trigger button").on("click", function(){
+                var cd = new Cooldown($(this).parent());
                 cooldowns.push(cd);
             });
 
