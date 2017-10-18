@@ -1,0 +1,38 @@
+body {
+    color: #000;
+    font-family: Arial;
+}
+
+.action-list {
+    width: 600px;
+    margin: 0px auto;
+}
+
+.action-panel {
+    width: 400px;
+    margin-top: 5px;
+    background-color: #C0C0C0;
+    text-align: center;
+    padding: 10px;
+}
+
+.action-trigger {
+    margin: 0px auto;
+    cursor: pointer;
+}
+
+.progress-bar {
+    padding: 6px 12px;
+}
+
+.btn {
+    height: 32px;
+    margin-bottom: 20px;
+}
+
+.progress {
+    height: 32px;
+    margin: 0px;
+    font-size: 14px;
+    border: 1px solid #2e6da4;
+}
